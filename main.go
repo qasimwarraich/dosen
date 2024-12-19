@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -24,9 +25,9 @@ type Deal struct {
 
 func main() {
 	ankerOnSale := false
-	ankerDeal := Deal{}
+	var ankerDeal Deal
 
-	deals, err := parseWeb()
+	deals, err := scrapeDeals()
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
@@ -37,7 +38,6 @@ func main() {
 	t.AppendHeader(table.Row{"Name", "Price (CHF)", "Discount", "Store", "Validity", "Misc"})
 
 	for _, deal := range deals {
-
 		if strings.Contains(deal.name, "Anker") || strings.Contains(deal.name, "anker") {
 			ankerOnSale = true
 			ankerDeal = Deal{
@@ -50,8 +50,11 @@ func main() {
 			}
 		}
 
-		t.AppendRow(table.Row{deal.name, deal.price, deal.discount, deal.store, deal.validity, wordwrap.String(deal.description, 40)})
+		if strings.Contains(deal.store, "OTTO'S") || deal.description == "" {
+			deal.description = tryFormatFromName(deal.name)
+		}
 
+		t.AppendRow(table.Row{deal.name, deal.price, deal.discount, deal.store, deal.validity, wordwrap.String(deal.description, 40)})
 		t.AppendSeparator()
 	}
 	t.SetStyle(table.StyleBold)
@@ -78,7 +81,7 @@ func main() {
 	os.Exit(0)
 }
 
-func parseWeb() ([]Deal, error) {
+func scrapeDeals() ([]Deal, error) {
 	deals := []Deal{}
 	c := colly.NewCollector(colly.AllowedDomains("www.aktionis.ch"))
 	c.OnHTML(".card", func(e *colly.HTMLElement) {
@@ -86,17 +89,10 @@ func parseWeb() ([]Deal, error) {
 		newPriceText := strings.Split(e.ChildText(".price-new"), " ")
 		if len(newPriceText) == 1 {
 			newPrice := newPriceText[0]
-			oldPrice := e.ChildText(".price-old")
 			discount := e.ChildText(".price-discount")
 			description := e.ChildText(".card-description")
 			validity := e.ChildText(".card-date")
 			store := e.DOM.Find("img").Nodes[0].Attr[1].Val
-
-			slog.Debug("current card", "name", name)
-			slog.Debug("found description", "description", description)
-			slog.Debug("found validity", "validity", validity)
-			slog.Debug("found store", "store", store)
-			slog.Debug("found prices", "new-price", newPrice, "old-price", oldPrice, "discount", discount)
 
 			deals = append(deals, Deal{
 				name:        name,
@@ -116,4 +112,11 @@ func parseWeb() ([]Deal, error) {
 	}
 
 	return deals, nil
+}
+
+func tryFormatFromName(name string) string {
+	trimmed := strings.TrimLeftFunc(name, func(r rune) bool {
+		return !unicode.IsDigit(r)
+	})
+	return trimmed
 }
