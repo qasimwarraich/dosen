@@ -57,7 +57,6 @@ func main() {
 		t.AppendRow(table.Row{deal.name, deal.price, deal.discount, deal.store, deal.validity, wordwrap.String(deal.description, 40)})
 		t.AppendSeparator()
 	}
-	t.SetStyle(table.StyleBold)
 
 	if !ankerOnSale {
 		fmt.Println("Anker is not on sale :/, here is the best of the rest:")
@@ -76,8 +75,9 @@ func main() {
 		fmt.Println("🚨🚨🚨🚨🚨🚨")
 		fmt.Println("Here is the best of the rest anyway:")
 	}
-	t.Render()
 
+	t.SetStyle(table.StyleBold)
+	t.Render()
 	os.Exit(0)
 }
 
