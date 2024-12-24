@@ -44,7 +44,7 @@ func main() {
 				name:        deal.name,
 				description: deal.description,
 				price:       deal.price,
-				discount:    deal.description,
+				discount:    deal.discount,
 				store:       deal.store,
 				validity:    deal.validity,
 			}
@@ -61,19 +61,8 @@ func main() {
 	if !ankerOnSale {
 		fmt.Println("Anker is not on sale :/, here is the best of the rest:")
 	} else {
-		fmt.Println("🚨🚨🚨🚨🚨🚨")
-		fmt.Println("ANKER IS ON SALE!")
-		fmt.Println(ankerDeal)
-		fmt.Printf(
-			"Anker is on sale at %s!. The price is %s, which means a discount of %s!.\ninfo: %s\n until: %s\n",
-			ankerDeal.store,
-			ankerDeal.price,
-			ankerDeal.discount,
-			ankerDeal.description,
-			ankerDeal.validity,
-		)
-		fmt.Println("🚨🚨🚨🚨🚨🚨")
-		fmt.Println("Here is the best of the rest anyway:")
+		printAnkerOnSale(ankerDeal)
+		fmt.Println("Here is the full list of deals:")
 	}
 
 	t.SetStyle(table.StyleBold)
@@ -119,4 +108,64 @@ func tryFormatFromName(name string) string {
 		return !unicode.IsDigit(r)
 	})
 	return trimmed
+}
+
+func printAnkerOnSale(d Deal) {
+	borderChar := "*"
+	title := "🚨ANKER IS ON SALE!🚨"
+
+	infoString := fmt.Sprintf(
+		"%s is on sale at %s!. The price is %v, which means a discount of %s!",
+		d.name,
+		d.store,
+		d.price,
+		d.discount,
+	)
+
+	validityString := ""
+	if d.validity != "" {
+		validityString = fmt.Sprintf("Validity: %s", d.validity)
+	}
+
+	infoWidth := len(infoString)
+	padding := 4
+	maxWidth := infoWidth + padding
+
+	var b strings.Builder
+	for range maxWidth {
+		b.WriteString(borderChar)
+	}
+	border := b.String()
+
+	fmt.Println(border)
+	fmt.Printf("%s%s%s\n", borderChar, assembleLine(title, maxWidth), borderChar)
+	fmt.Printf("%s%s%s\n", borderChar, assembleLine(infoString, maxWidth), borderChar)
+	if validityString != "" {
+		fmt.Printf("%s%s%s\n", borderChar, assembleLine(validityString, maxWidth), borderChar)
+	}
+	fmt.Println(border)
+}
+
+func assembleLine(str string, formatWidth int) string {
+	if len(str)%2 != 0 {
+		str = str + " "
+	}
+	padding := formatWidth - len(str)
+	if strings.Contains(str, "🚨") {
+		padding += 4
+	}
+	if padding%2 != 0 {
+		padding += 1
+	}
+
+	var b strings.Builder
+	for range padding/2 - 1 {
+		b.WriteString(" ")
+	}
+	b.WriteString(str)
+	for range padding/2 - 1 {
+		b.WriteString(" ")
+	}
+
+	return b.String()
 }
