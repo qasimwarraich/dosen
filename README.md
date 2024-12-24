@@ -1,4 +1,4 @@
-# Anker
+# Dosen
 
 This is a messy program that checks if Anker beer is currently on discount. It
 scrapes https://www.aktionis.ch/deals?c=8-26 for it's information.
@@ -6,7 +6,7 @@ scrapes https://www.aktionis.ch/deals?c=8-26 for it's information.
 ## Installation
 
 ```
-go install github.com/qasimwarraich/anker@latest
+go install github.com/qasimwarraich/dosen@latest
 ```
 
 Disclaimer: This is garbage software, no guarantees.

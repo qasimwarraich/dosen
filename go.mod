@@ -1,4 +1,4 @@
-module github.com/qasimwarraich/anker
+module github.com/qasimwarraich/dosen
 
 go 1.23.3
 
